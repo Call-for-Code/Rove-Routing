@@ -1,5 +1,44 @@
-// Instantiate a map and platform object:
+//const getRectangles = require('./calculate_blocked_roads.js')
 
+var calculateRectangles = function(segment) {
+  // return all the rectangles that correspond to the segment
+  var rectangle = {
+    'lat1': Math.max(segment.lat1, segment.lat2),
+    'lng1': Math.min(segment.lng1, segment.lng2),
+    'lat2': Math.min(segment.lat1, segment.lat2),
+    'lng2': Math.max(segment.lng1, segment.lng2)
+  }
+  return rectangle;
+}
+
+var processBlockedRoads = function() {
+  // get the data from Max
+  // some sort of input
+  var blockedRoads = [37.302391, -122.000760, 37.302184, -122.000655, 
+                      37.303651, -122.003879, 37.302439, -122.002040];
+  var segments = [];
+  // process the data
+  for (var i = 0; i < blockedRoads.length; i+=4) {
+    var segment = {
+      'lat1': blockedRoads[i],
+      'lng1': blockedRoads[i+1],
+      'lat2': blockedRoads[i+2],
+      'lng2': blockedRoads[i+3]
+    };
+    segments.push(segment);
+  }
+  return segments;
+}
+
+var segments = processBlockedRoads();
+var rectangles = [];
+for (var i = 0; i < segments.length; i++) {
+  //console.log();
+  rectangles.push(calculateRectangles(segments[i]));
+  //console.log();
+}
+
+// Instantiate a map and platform object:
 var platform = new H.service.Platform({
   'apikey': '0up0QFyBHkN_L0y1CiABHMc7VVSbX_gbf9zwrJFvSR0'
 });
@@ -15,8 +54,23 @@ var map = new H.Map(
   defaultLayers.vector.normal.map,
   {
   zoom: 10,
-  center: { lat: 52.51, lng: 13.4 }
+  center: { lat: 41.110759, lng: -73.719639 }
   });
+
+// get areas to avoid
+//var rects = getRectangles.calculateBlockedRoads();
+var rects = rectangles;
+var strRects = "";
+for (var i = 0; i < rects.length; i++) {
+  if (i != 0) strRects += '!';
+  strRects += rects[i].lat1 + ',' + rects[i].lng1 + ";"
+            + rects[i].lat2 + ',' + rects[i].lng2;
+}
+console.log(segments);
+console.log(rects);
+console.log(strRects);
+
+
 // Create the parameters for the routing request:
 var routingParameters = {
   // The routing mode:
@@ -27,7 +81,7 @@ var routingParameters = {
   'waypoint1': 'geo!37.298050,-122.007210',
   // To retrieve the shape of the route we choose the route
   // representation mode 'display'
-  'avoidareas': '37.302391,-122.000760;37.302184,-122.000655',
+  'avoidareas': strRects,
   'representation': 'display'
 };
 
@@ -50,7 +104,7 @@ var onResult = function(result) {
   // Push all the points in the shape into the linestring:
   routeShape.forEach(function(point) {
   var parts = point.split(',');
-  console.log(parts);
+  //console.log(parts);
   linestring.pushLatLngAlt(parts[0], parts[1]);
   });
 
