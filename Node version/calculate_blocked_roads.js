@@ -15,7 +15,7 @@ exports.calculateBlockedRoads = function() {
 		// get the data from Max
 		// some sort of input
 		var blockedRoads = [37.302391, -122.000760, 37.302184, -122.000655, 
-							37.302629, -121.999748, 37.302197, -121.999346];
+							37.303651, -122.003879, 37.302439, -122.002040];
 		var segments = [];
 		// process the data
 		for (var i = 0; i < blockedRoads.length; i+=4) {

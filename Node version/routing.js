@@ -104,7 +104,7 @@ var onResult = function(result) {
   // Push all the points in the shape into the linestring:
   routeShape.forEach(function(point) {
   var parts = point.split(',');
-  //console.log(parts);
+  console.log(parts);
   linestring.pushLatLngAlt(parts[0], parts[1]);
   });
 
