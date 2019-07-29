@@ -1,0 +1,5 @@
+---
+applications:
+ - name: Routing C4C
+   random-route: true
+   memory: 128M
