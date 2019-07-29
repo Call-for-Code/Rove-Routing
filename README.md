@@ -1,10 +1,13 @@
 # Call-For-Code-Routing
-Routing for Call for Code using HERE JS API
+Routing for Call for Code using HERE JS and REST API
 
 Focus is on avoiding certain roads (because of potential damage in natural disasters)
 
-Given a road segment, which is represented as two pairs of coordinates of latitude, longitude, routing is done by avoiding these roads.
+Given a road segment, which is represented as two pairs of coordinates of latitude, longitude, routing is done by avoiding these roads. The result is a list of coordinates that specify the fastest route.
 
-The API only allows for avoidance of rectangular sections that are parallel to global axes, so the road is segmented for more precision.
+Both Javascript and REST versions are implemented, and it is deployed to IBM Cloud with a Flask Python app at ligma@mybluemix.net
 
-The result is a list of coordinates that specify the fastest route.
+### Requests to the server
+Base url: ligma@mybluemix.net/api/route/
+Parameters: start, end
+Format for each must be latitutecoordinate,longitudecoordinate with no spaces
