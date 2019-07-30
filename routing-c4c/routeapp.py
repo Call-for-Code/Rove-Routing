@@ -52,6 +52,7 @@ def routeIt():
     print(res)
     # if len(res['route']) < 3:
     #   abort(400)
+    res.headers.add('Access-Control-Allow-Origin', '*')
     return res, 200 
 
 @atexit.register
