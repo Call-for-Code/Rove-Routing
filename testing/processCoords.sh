@@ -1,6 +1,6 @@
 #!/bin/bash
 
-coords=`sed 's/[^\[]*//' data.txt | tr -d " \[\"\]"`
+coords=`cat data.txt | tr -d " \[\"\]"`
 
 i=0
 for line in $coords

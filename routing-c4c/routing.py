@@ -6,18 +6,31 @@ from flask import jsonify
 def calculateRectangles(segment):
 	# return all the rectangles that correspond to the segment
 	rectangle = {
-		'lat1': max(segment['lat1'], segment['lat2']),
-		'lng1': min(segment['lng1'], segment['lng2']),
-		'lat2': min(segment['lat1'], segment['lat2']),
-		'lng2': max(segment['lng1'], segment['lng2'])
+		'lat1': max(segment['lat1'], segment['lat2'])+0.0001,
+		'lng1': min(segment['lng1'], segment['lng2'])-0.0001,
+		'lat2': min(segment['lat1'], segment['lat2'])-0.0001,
+		'lng2': max(segment['lng1'], segment['lng2'])+0.0001
 	}
 	return rectangle
 
+def getBlockedRoads():
+	file = open("roads.geojson", "r")
+	roadData = file.readline()
+	roads = []
+	for feature in roadData['features']:
+		points = feature['properties']['geometry']['coordinates']
+		for i in range(len(points)):
+			roads.append(points[i][0])
+			roads.append(points[i][1])
+			if i != 0 and i != len(points)-1:
+				roads.append(points[i][0])
+				roads.append(points[i][1])
+
+	return roads
 
 def processBlockedRoads():
 	# get the data from Max
-	# some sort of input
-	blockedRoads = []
+	blockedRoads = getBlockedRoads()
 	segments = []
 	# process the data
 	i = 0
