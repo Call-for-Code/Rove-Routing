@@ -1,10 +1,16 @@
 import requests
 import sys
 from flask import jsonify
+import json
 
+def checkIntersection(seg1, seg2):
+
+	return False
 
 def calculateRectangles(segment):
 	# return all the rectangles that correspond to the segment
+	# print("hi")
+	# print(segment['lat1'])
 	rectangle = {
 		'lat1': max(segment['lat1'], segment['lat2'])+0.0001,
 		'lng1': min(segment['lng1'], segment['lng2'])-0.0001,
@@ -15,16 +21,25 @@ def calculateRectangles(segment):
 
 def getBlockedRoads():
 	file = open("roads.geojson", "r")
-	roadData = file.readline()
+	roadData = json.loads(file.readline())
 	roads = []
 	for feature in roadData['features']:
-		points = feature['properties']['geometry']['coordinates']
-		for i in range(len(points)):
-			roads.append(points[i][0])
-			roads.append(points[i][1])
-			if i != 0 and i != len(points)-1:
-				roads.append(points[i][0])
+		points = feature['geometry']['coordinates']
+		if feature['geometry']['type'] == "LineString":
+			for i in range(len(points)):
 				roads.append(points[i][1])
+				roads.append(points[i][0])
+				if i != 0 and i != len(points)-1:
+					roads.append(points[i][1])
+					roads.append(points[i][0])
+		else:
+			for coords in points:
+				for i in range(len(coords)):
+					roads.append(coords[i][1])
+					roads.append(coords[i][0])
+					if i != 0 and i != len(coords)-1:
+						roads.append(coords[i][1])
+						roads.append(coords[i][0])
 
 	return roads
 
@@ -50,9 +65,7 @@ def processToString():
 	segments = processBlockedRoads()
 	rects = []
 	for seg in segments:
-		#console.log();
 		rects.append(calculateRectangles(seg))
-		#console.log();
 	strRects = ""
 	i = 0
 	for rect in rects:
@@ -66,30 +79,58 @@ def processToString():
 	# print(strRects);
 	return strRects
 def routePath(start, end):
-	strRects = processToString()
-
-	# 37.301750,-122.000900 start
-	# 37.298050,-122.007210 end
+	blockedRoads = getBlockedRoads()
+	strRects = ""
+	# print(strRects)
+	# print(strRects.count('!'))
+	# 29.700232,-95.401736 start
+	# 29.841133,-95.377595 end
 	# get request
-	res = requests.get('https://route.api.here.com/routing/7.2/calculateroute.json', 
-		params = {'app_id':'Te1UQqIdCLzaogGN5nwS',
-					'app_code':'evjL5KiQwy1TvVmY1cMJZw',
-					'waypoint0':'geo!'+start,
-					'waypoint1':'geo!'+end,
-					'mode':'fastest;car;traffic:disabled',
-					'routeAttributes':'shape',
-					'avoidareas':strRects
-				}
-			)
-	if not res:
-		sys.exit("Error with request")
-	#print(res.json())
-	route = res.json()['response']['route'][0]['shape']
+	for i in range(20): # max 20 rectangles allowed by the API
+		res = requests.get('https://route.api.here.com/routing/7.2/calculateroute.json', 
+			params = {'app_id':'Te1UQqIdCLzaogGN5nwS',
+						'app_code':'evjL5KiQwy1TvVmY1cMJZw',
+						'waypoint0':'geo!'+start,
+						'waypoint1':'geo!'+end,
+						'mode':'fastest;car;traffic:disabled',
+						'routeAttributes':'shape',
+						'avoidareas':strRects
+					}
+				)
+		if not res:
+			print(res.json())
+			sys.exit("Error with request")
+		# print(res.json())
+		route = res.json()['response']['route'][0]['shape']
+		routeSegs = []
+		for i in range(len(route)-1):
+			point1 = route[i].split(',')
+			point2 = route[i+1].split(',')
+			seg = {
+				'lat1': float(point1[0]),
+				'lng1': float(point1[1]),
+				'lat2': float(point2[0]),
+				'lng2': float(point2[1])
+			}
+			anyBlockage = False
+			for bRoad in blockedRoads:
+				if checkIntersection(seg, bRoad):
+					anyBlockage = True
+					break
+			if not anyBlockage: # no blocking!!!
+				print("Path is not blocked!")
+				break
 
-	i = 0
-	for coords in route:
-		i += 1
-		#print(coords + "," + str(i) + ",#00FF00")
+	# i = 0
+	# for coords in route:
+	# 	i += 1
+	# 	#print(coords + "," + str(i) + ",#00FF00")
 	return jsonify({'route': route})
 
+if __name__ == '__main__':
+	print("What are starting coordinates: ")
+	start = input()
+	print("What are ending coordinates: ")
+	end = input()
+	routePath(start, end)
 
