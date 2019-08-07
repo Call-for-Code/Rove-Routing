@@ -3,9 +3,17 @@ import sys
 from flask import jsonify
 import json
 
-def checkIntersection(seg1, seg2):
+def checkIntersectionSeg(seg1, seg2):
+	slope1 = (seg1['lng2']-seg1['lng1'])*(seg2['lat2']-seg2['lat1'])
+	slope2 = (seg2['lng2']-seg2['lng1'])*(seg1['lat2']-seg1['lat1'])
+	interm = slope1*seg1['lat1']-slope2*seg2['lat1']
+	latInt = interm/(slope2-slope1)
+	seg1Diff = (latInt-seg1['lat1'])*(latInt-seg1['lat2'])
+	seg2Diff = (latInt-seg2['lat1'])*(latInt-seg2['lat2'])
+	return (seg1Diff <= 0 and seg2Diff <= 0)
 
-	return False
+def checkIntersectionRect(seg1, seg2):
+	return
 
 def calculateRectangles(segment):
 	# return all the rectangles that correspond to the segment
@@ -79,14 +87,14 @@ def processToString():
 	# print(strRects);
 	return strRects
 def routePath(start, end):
-	blockedRoads = getBlockedRoads()
+	blockedRoads = processBlockedRoads()
 	strRects = ""
 	# print(strRects)
 	# print(strRects.count('!'))
 	# 29.700232,-95.401736 start
 	# 29.841133,-95.377595 end
 	# get request
-	for i in range(20): # max 20 rectangles allowed by the API
+	for i in range(21): # max 20 rectangles allowed by the API
 		res = requests.get('https://route.api.here.com/routing/7.2/calculateroute.json', 
 			params = {'app_id':'Te1UQqIdCLzaogGN5nwS',
 						'app_code':'evjL5KiQwy1TvVmY1cMJZw',
@@ -114,13 +122,16 @@ def routePath(start, end):
 			}
 			anyBlockage = False
 			for bRoad in blockedRoads:
-				if checkIntersection(seg, bRoad):
+				if checkIntersectionSeg(seg, bRoad):
 					anyBlockage = True
 					break
 			if not anyBlockage: # no blocking!!!
 				print("Path is not blocked!")
 				break
-
+		if not anyBlockage:
+			break
+	if anyBlockage:
+		print("Cannot avoid blocked roads")
 	# i = 0
 	# for coords in route:
 	# 	i += 1
