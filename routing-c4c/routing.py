@@ -6,8 +6,9 @@ import json
 def checkIntersectionSeg(seg1, seg2):
 	slope1 = (seg1['lng2']-seg1['lng1'])*(seg2['lat2']-seg2['lat1'])
 	slope2 = (seg2['lng2']-seg2['lng1'])*(seg1['lat2']-seg1['lat1'])
-	interm = slope1*seg1['lat1']-slope2*seg2['lat1']
+	interm = slope2*seg2['lat1']-slope1*seg1['lat1']+(seg2['lat2']-seg2['lat1'])*(seg1['lat2']-seg1['lat1'])*(seg1['lng1']-seg2['lng1'])
 	latInt = interm/(slope2-slope1)
+	# print(latInt)
 	seg1Diff = (latInt-seg1['lat1'])*(latInt-seg1['lat2'])
 	seg2Diff = (latInt-seg2['lat1'])*(latInt-seg2['lat2'])
 	return (seg1Diff <= 0 and seg2Diff <= 0)
@@ -111,9 +112,9 @@ def routePath(start, end):
 		# print(res.json())
 		route = res.json()['response']['route'][0]['shape']
 		routeSegs = []
-		for i in range(len(route)-1):
-			point1 = route[i].split(',')
-			point2 = route[i+1].split(',')
+		for j in range(len(route)-1):
+			point1 = route[j].split(',')
+			point2 = route[j+1].split(',')
 			seg = {
 				'lat1': float(point1[0]),
 				'lng1': float(point1[1]),
@@ -121,21 +122,45 @@ def routePath(start, end):
 				'lng2': float(point2[1])
 			}
 			anyBlockage = False
+			# break
 			for bRoad in blockedRoads:
 				if checkIntersectionSeg(seg, bRoad):
 					anyBlockage = True
+					roadBlock = bRoad # the blocking road
 					break
 			if not anyBlockage: # no blocking!!!
 				print("Path is not blocked!")
 				break
+		
+		
 		if not anyBlockage:
 			break
+		print("Path still blocked " + str(i))
+		if strRects != "":
+			strRects += "!"
+		strRects += str(roadBlock['lat1']) + ',' + str(roadBlock['lng1']) + ";" + str(roadBlock['lat2']) + ',' + str(roadBlock['lng2'])
 	if anyBlockage:
 		print("Cannot avoid blocked roads")
-	# i = 0
-	# for coords in route:
-	# 	i += 1
-	# 	#print(coords + "," + str(i) + ",#00FF00")
+	i = 0
+	for coords in route:
+		i += 1
+		#print(coords + "," + str(i) + ",#00FF00")
+
+	seg1 = {
+		'lat1': 0,
+		'lng1': 1,
+		'lat2': 2,
+		'lng2': 1
+	}
+	seg2 = {
+		'lat1': 1,
+		'lng1': 0,
+		'lat2': 0,
+		'lng2': 1
+	}
+	print(checkIntersectionSeg(seg1, seg2))
+	
+
 	return jsonify({'route': route})
 
 if __name__ == '__main__':
