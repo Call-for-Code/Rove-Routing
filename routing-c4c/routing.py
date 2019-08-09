@@ -2,6 +2,7 @@ import requests
 import sys
 from flask import jsonify
 import json
+import os
 
 def checkIntersectionSeg(seg1, seg2):
 	slope1 = (seg1['lng2']-seg1['lng1'])*(seg2['lat2']-seg2['lat1'])
@@ -95,10 +96,12 @@ def routePath(start, end):
 	# 29.700232,-95.401736 start
 	# 29.841133,-95.377595 end
 	# get request
+	APP_ID = os.getenv("APP_ID")
+	APP_CODE = os.getenv("APP_CODE")
 	for i in range(21): # max 20 rectangles allowed by the API
 		res = requests.get('https://route.api.here.com/routing/7.2/calculateroute.json', 
-			params = {'app_id':'Te1UQqIdCLzaogGN5nwS',
-						'app_code':'evjL5KiQwy1TvVmY1cMJZw',
+			params = {'app_id':APP_ID,
+						'app_code':APP_CODE,
 						'waypoint0':'geo!'+start,
 						'waypoint1':'geo!'+end,
 						'mode':'fastest;car;traffic:disabled',

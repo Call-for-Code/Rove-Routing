@@ -1,0 +1,2 @@
+export SECRET_KEY=sekritvalue
+export OTHER_SECRET=somethingelse
