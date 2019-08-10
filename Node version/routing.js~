@@ -45,7 +45,7 @@ for (var i = 0; i < segments.length; i++) {
 
 // Instantiate a map and platform object:
 var platform = new H.service.Platform({
-  'apikey': 'insert your api key here'
+  'apikey': '0up0QFyBHkN_L0y1CiABHMc7VVSbX_gbf9zwrJFvSR0'
 });
 // Retrieve the target element for the map:
 var targetElement = document.getElementById('mapContainer');

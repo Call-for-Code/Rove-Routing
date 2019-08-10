@@ -64,8 +64,8 @@ def routePath(start, end):
 	# 37.298050,-122.007210 end
 	# get request
 	res = requests.get('https://route.api.here.com/routing/7.2/calculateroute.json', 
-		params = {'app_id':insert-api-key-here,
-					'app_code':insert-app-code-here,
+		params = {'app_id':'Te1UQqIdCLzaogGN5nwS',
+					'app_code':'evjL5KiQwy1TvVmY1cMJZw',
 					'waypoint0':'geo!'+start,
 					'waypoint1':'geo!'+end,
 					'mode':'fastest;car;traffic:disabled',

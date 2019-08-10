@@ -63,4 +63,3 @@ target/
 *.DS_Store
 
 vcap-local.json
-.env
