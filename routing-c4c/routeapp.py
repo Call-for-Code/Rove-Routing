@@ -39,10 +39,6 @@ elif os.path.isfile('vcap-local.json'):
 # When running this app on the local machine, default the port to 8000
 port = int(os.getenv('PORT', 8000))
 
-@app.route('/', methods = ['GET'])
-def whatIsLigma():
-    print("what is ligma?")
-
 @app.route('/api/route/', methods = ['GET'])
 def routeIt():
     args = request.args.to_dict()

@@ -50,7 +50,10 @@ def getBlockedRoads():
 					if i != 0 and i != len(coords)-1:
 						roads.append(coords[i][1])
 						roads.append(coords[i][0])
-
+	roads.append(29.82);
+	roads.append(-95.46231);
+	roads.append(29.85);
+	roads.append(-95.45988);
 	return roads
 
 def processBlockedRoads():
@@ -95,6 +98,9 @@ def routePath(start, end):
 	# print(strRects.count('!'))
 	# 29.700232,-95.401736 start
 	# 29.841133,-95.377595 end
+
+	# 29.832296,-95.451352
+	# 29.841382,-95.488790
 	# get request
 	APP_ID = os.getenv("APP_ID")
 	APP_CODE = os.getenv("APP_CODE")
@@ -115,6 +121,7 @@ def routePath(start, end):
 		# print(res.json())
 		route = res.json()['response']['route'][0]['shape']
 		routeSegs = []
+		anyBlockage = False
 		for j in range(len(route)-1):
 			point1 = route[j].split(',')
 			point2 = route[j+1].split(',')
@@ -124,15 +131,14 @@ def routePath(start, end):
 				'lat2': float(point2[0]),
 				'lng2': float(point2[1])
 			}
-			anyBlockage = False
+			
 			# break
 			for bRoad in blockedRoads:
 				if checkIntersectionSeg(seg, bRoad):
 					anyBlockage = True
 					roadBlock = bRoad # the blocking road
 					break
-			if not anyBlockage: # no blocking!!!
-				print("Path is not blocked!")
+			if anyBlockage: # blocking happened
 				break
 		
 		
@@ -141,8 +147,11 @@ def routePath(start, end):
 		print("Path still blocked " + str(i))
 		if strRects != "":
 			strRects += "!"
+		roadBlock = calculateRectangles(roadBlock)
+		print(roadBlock)
 		strRects += str(roadBlock['lat1']) + ',' + str(roadBlock['lng1']) + ";" + str(roadBlock['lat2']) + ',' + str(roadBlock['lng2'])
 	if anyBlockage:
+		print(strRects)
 		print("Cannot avoid blocked roads")
 	i = 0
 	for coords in route:
@@ -150,16 +159,16 @@ def routePath(start, end):
 		#print(coords + "," + str(i) + ",#00FF00")
 
 	seg1 = {
-		'lat1': 0,
-		'lng1': 1,
-		'lat2': 2,
-		'lng2': 1
+		'lat1': 29.832296,
+		'lng1': -95.451352,
+		'lat2': 29.841382,
+		'lng2': -95.488790
 	}
 	seg2 = {
-		'lat1': 1,
-		'lng1': 0,
-		'lat2': 0,
-		'lng2': 1
+		'lat1': 29.82,
+		'lng1': -95.46231,
+		'lat2': 29.85,
+		'lng2': -95.45988
 	}
 	print(checkIntersectionSeg(seg1, seg2))
 	
