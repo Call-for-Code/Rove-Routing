@@ -4,6 +4,7 @@ from flask import jsonify
 import json
 import os
 import time
+from bisect import bisect
 
 def checkIntersectionSeg(seg1, seg2):
 	slope1 = (seg1['lng2']-seg1['lng1'])*(seg2['lat2']-seg2['lat1'])
@@ -88,6 +89,7 @@ def processBlockedRoads():
 	
 	#print(segments)
 	return segments
+
 def processToString():
 	segments = processBlockedRoads()
 	rects = []
@@ -106,7 +108,17 @@ def processToString():
 	# print(strRects);
 	return strRects
 def routePath(start, end):
+	start_time = time.time()
 	blockedRoads = processBlockedRoads()
+	latBlockedRoads = []
+	for i, road in enumerate(blockedRoads):
+		latBlockedRoads.append((road['lat1'], i))
+		latBlockedRoads.append((road['lat2'], i))
+	latBlockedRoads.sort()
+	end_time = time.time()
+	print("PREPROCESSING TIME:", end_time-start_time)
+	# print(latBlockedRoads[0])
+	# print(latBlockedRoads[len(latBlockedRoads)-1])
 	strRects = ""
 	# print(strRects)
 	# print(strRects.count('!'))
@@ -150,12 +162,16 @@ def routePath(start, end):
 				'lat2': float(point2[0]),
 				'lng2': float(point2[1])
 			}
+			lowLat = min(seg['lat1'], seg['lat2'])
+			highLat = max(seg['lat1'], seg['lat2'])
+
+			leftLatPos = bisect(latBlockedRoads, (lowLat - 0.03, -1))
+			rightLatPos = bisect(latBlockedRoads, (highLat + 0.03, -1))
 			
-			# break
-			for bRoad in blockedRoads:
-				if checkIntersectionSeg(seg, bRoad):
+			for lat, k in latBlockedRoads[leftLatPos:rightLatPos]:
+				if checkIntersectionSeg(seg, blockedRoads[k]):
 					anyBlockage = True
-					roadBlock = bRoad # the blocking road
+					roadBlock = blockedRoads[k] # the blocking road
 					break
 			if anyBlockage: # blocking happened
 				break
