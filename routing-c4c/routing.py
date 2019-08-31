@@ -174,6 +174,7 @@ def routePath(start, end):
 					roadBlock = blockedRoads[k] # the blocking road
 					break
 			if anyBlockage: # blocking happened
+				print(j+1, "path segments processed")
 				break
 		
 		end_time = time.time()
@@ -183,7 +184,7 @@ def routePath(start, end):
 		print("Path still blocked " + str(i))
 		if strRects != "":
 			strRects += "!"
-		print(len(route))
+		print(len(route), "total segments on path")
 		print(roadBlock)
 		roadBlock = calculateRectangles(roadBlock)
 		strRects += str(roadBlock['lat1']) + ',' + str(roadBlock['lng1']) + ";" + str(roadBlock['lat2']) + ',' + str(roadBlock['lng2'])
